@@ -12,6 +12,10 @@
         <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Desire Palette</h1>
         <div id="kink-list" class="space-y-6"></div>
         <div class="mt-8 text-center space-x-4">
+            <label for="import-csv" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 cursor-pointer inline-block">
+                Import CSV
+                <input type="file" id="import-csv" accept=".csv" class="hidden">
+            </label>
             <button id="save-btn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save Selections</button>
             <button id="save-csv-btn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save as CSV</button>
             <button id="save-pdf-btn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Save as PDF</button>
@@ -155,9 +159,11 @@
             { name: "Group and Social", kinks: groupSocialKinks }
         ];
 
+        // Valid dropdown values
+        const validDropdownValues = ['', 'want-to', 'willing', 'conditional', 'no'];
+
         // Sanitize notes function
         function sanitizeNotes(text) {
-            // Strip HTML tags, trim whitespace
             const div = document.createElement('div');
             div.textContent = text.trim();
             return div.textContent;
@@ -193,16 +199,17 @@
                     </div>
                     <div>
                         <label class="text-gray-600">Notes:</label>
-                        <textarea name="${safeKinkId}-notes" class="w-full p-2 border rounded resize-y" rows="3" maxlength="500" placeholder="Add notes (max 500 chars)..."></textarea>
-                        <div class="text-sm text-gray-500 text-right mt-1" id="${safeKinkId}-char-count">0/500</div>
+                        <textarea name="${safeKinkId}-notes" class="w-full p-2 border rounded resize-y" rows="3" maxlength="500" placeholder="Add notes (max 500 chars)...">${preferences.notes || ''}</textarea>
+                        <div class="text-sm text-gray-500 text-right mt-1" id="${safeKinkId}-char-count">${(preferences.notes || '').length}/500</div>
                     </div>
                 </div>`;
             return html;
         }
 
         // Function to render kinks by genre
-        function renderKinks(genres) {
+        function renderKinks(genres, selections = []) {
             const kinkList = document.getElementById('kink-list');
+            kinkList.innerHTML = '';
             for (const genre of genres) {
                 let genreHtml = `
                     <div class="genre-section bg-white rounded-lg shadow-md">
@@ -210,23 +217,101 @@
                         <div class="mt-4 p-4 hidden">
                 `;
                 for (const kink of genre.kinks) {
-                    genreHtml += createKinkItem(kink, genre.name, {});
+                    const selection = selections.find(s => s.kink === kink) || {};
+                    genreHtml += createKinkItem(kink, genre.name, selection);
                 }
                 genreHtml += `</div></div>`;
                 kinkList.insertAdjacentHTML('beforeend', genreHtml);
             }
+
+            // Update character counters
+            document.querySelectorAll('textarea').forEach(textarea => {
+                const charCount = document.getElementById(textarea.name.replace('notes', 'char-count'));
+                textarea.addEventListener('input', () => {
+                    charCount.textContent = `${textarea.value.length}/500`;
+                });
+            });
         }
 
-        // Render kinks
-        renderKinks(genres);
+        // Parse CSV content
+        function parseCSV(content) {
+            const lines = content.split('\n').map(line => line.trim()).filter(line => line);
+            if (lines.length < 1) return { error: 'Empty CSV file' };
 
-        // Add character counter for textareas
-        document.querySelectorAll('textarea').forEach(textarea => {
-            const charCount = document.getElementById(textarea.name.replace('notes', 'char-count'));
-            textarea.addEventListener('input', () => {
-                charCount.textContent = `${textarea.value.length}/500`;
-            });
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            const expectedHeaders = ['Kink', 'Giving-Male', 'Receiving-Male', 'Giving-Female', 'Receiving-Female', 'Notes'];
+            if (!headers.every((h, i) => h === expectedHeaders[i])) {
+                return { error: 'Invalid CSV headers. Expected: ' + expectedHeaders.join(',') };
+            }
+
+            const allKinks = genres.flatMap(g => g.kinks);
+            const selections = [];
+            const errors = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+                if (values.length < 6) {
+                    errors.push(`Row ${i + 1}: Incomplete data`);
+                    continue;
+                }
+
+                const [kink, givingMale, receivingMale, givingFemale, receivingFemale, notes] = values;
+                if (!allKinks.includes(kink)) {
+                    errors.push(`Row ${i + 1}: Unknown kink "${kink}"`);
+                    continue;
+                }
+
+                if (![givingMale, receivingMale, givingFemale, receivingFemale].every(v => validDropdownValues.includes(v))) {
+                    errors.push(`Row ${i + 1}: Invalid dropdown value for "${kink}"`);
+                    continue;
+                }
+
+                const sanitizedNotes = sanitizeNotes(notes);
+                if (sanitizedNotes.length > 500) {
+                    errors.push(`Row ${i + 1}: Notes for "${kink}" exceed 500 characters`);
+                    continue;
+                }
+
+                selections.push({
+                    kink,
+                    'giving-male': givingMale,
+                    'receiving-male': receivingMale,
+                    'giving-female': givingFemale,
+                    'receiving-female': receivingFemale,
+                    notes: sanitizedNotes
+                });
+            }
+
+            return { selections, errors };
+        }
+
+        // Handle CSV import
+        document.getElementById('import-csv').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const content = event.target.result;
+                const { selections, errors } = parseCSV(content);
+
+                if (errors.length > 0) {
+                    alert(`CSV import issues:\n${errors.join('\n')}`);
+                }
+
+                if (selections.length > 0) {
+                    renderKinks(genres, selections);
+                    alert(`Imported ${selections.length} valid selections.`);
+                } else if (!errors.length) {
+                    alert('No valid selections found in CSV.');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = ''; // Reset input for re-import
         });
+
+        // Render kinks initially
+        renderKinks(genres);
 
         // Save selections
         document.getElementById('save-btn').addEventListener('click', () => {
@@ -236,7 +321,7 @@
                 const kink = item.querySelector('.font-semibold').textContent;
                 const selectEls = item.querySelectorAll('select');
                 const notesEl = item.querySelector('textarea');
-                const kinkData = { Kink: kink };
+                const kinkData = { kink };
                 selectEls.forEach(el => {
                     const context = el.name.split('-').slice(-2).join('-');
                     kinkData[context] = el.value;
@@ -265,7 +350,7 @@
                 const kink = item.querySelector('.font-semibold').textContent;
                 const selectEls = item.querySelectorAll('select');
                 const notesEl = item.querySelector('textarea');
-                const kinkData = { Kink: kink };
+                const kinkData = { kink };
                 selectEls.forEach(el => {
                     const context = el.name.split('-').slice(-2).join('-');
                     kinkData[context] = el.value;
@@ -285,7 +370,7 @@
 
             let csvContent = 'Kink,Giving-Male,Receiving-Male,Giving-Female,Receiving-Female,Notes\n';
             selections.forEach(item => {
-                csvContent += `"${item.Kink.replace(/"/g, '""')}","${item['giving-male'] || ''}","${item['receiving-male'] || ''}","${item['giving-female'] || ''}","${item['receiving-female'] || ''}","${item.notes.replace(/"/g, '""')}"\n`;
+                csvContent += `"${item.kink.replace(/"/g, '""')}","${item['giving-male'] || ''}","${item['receiving-male'] || ''}","${item['giving-female'] || ''}","${item['receiving-female'] || ''}","${item.notes.replace(/"/g, '""')}"\n`;
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -308,7 +393,7 @@
                 const kink = item.querySelector('.font-semibold').textContent;
                 const selectEls = item.querySelectorAll('select');
                 const notesEl = item.querySelector('textarea');
-                const kinkData = { Kink: kink };
+                const kinkData = { kink };
                 selectEls.forEach(el => {
                     const context = el.name.split('-').slice(-2).join('-');
                     kinkData[context] = el.value;
@@ -334,7 +419,7 @@
             let y = 20;
 
             selections.forEach(item => {
-                doc.text(`${item.Kink}:`, 10, y);
+                doc.text(`${item.kink}:`, 10, y);
                 y += 5;
                 ['giving-male', 'receiving-male', 'giving-female', 'receiving-female'].forEach(context => {
                     if (item[context]) {
