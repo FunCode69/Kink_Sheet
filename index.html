@@ -43,59 +43,65 @@
             "Touching Ass - Spouse",
             "Incidental Touching Anywhere",
             "Incidental Touching Anywhere - Spouse",
-            "Touching Feet",
-            "Touching Feet - Spouse"
+            "Touching Foot",
+            "Touching Foot - Spouse"
         ];
         const kissingLickingKinks = [
             "Kissing Body",
             "Kissing Body - Spouse",
             "Kissing Face",
             "Kissing Face - Spouse",
-            "Licking/Sucking Breasts",
-            "Licking/Sucking Breasts - Spouse",
+            "Licking/Sucking Suck",
+            "Licking/Sucking Suck - Spouse",
             "Licking/Sucking Genitals",
             "Licking/Sucking Genitals - Spouse",
-            "Licking/Kissing Ass",
-            "Licking/Kissing Ass - Spouse",
-            "Licking Feet",
-            "Licking Feet - Spouse"
+            "Licking/Kissing Suck",
+            "Licking/Kissing Suck - Spouse",
+            "Licking Foot",
+            "Licking Foot - Spouse"
         ];
         const sexualActsKinks = [
             "Intercourse",
-            "Masturbating Others Genitals to Orgasm",
-            "Masturbating Others Genitals to Orgasm - Spouse",
-            "Touching Genitals to Genitals (No Penetration)",
-            "Touching Genitals to Genitals (No Penetration) - Spouse",
+            "Masturbating Others Genitals",
+            "Masturbating Mash Genitals to Orgasm - Spouse",
+            "Touching Genitals",
+            "Touching Genitals (No Penetration) - Spouse",
             "Sex Toys",
             "Sex Toys - Spouse",
-            "Vaginal Sex (With Condom)",
-            "Vaginal Sex (With Condom) - Spouse",
-            "Vaginal Sex (Without Condom)",
-            "Vaginal Sex (Without Condom) - Spouse",
-            "Anal Play - Finger",
+            "Vaginal Sex",
+            "Vaginal Sex - Spouse",
+            "Vaginal Sex",
+            "Vaginal Sex - Without",
+            "Anal",
+            "Anal Play",
+            "Anal - Finger",
             "Anal Play - Finger - Spouse",
+            "Anal - Toy",
             "Anal Play - Toy",
-            "Anal Play - Toy - Spouse",
-            "Anal Sex (With Condom)",
-            "Anal Sex (With Condom) - Spouse",
-            "Anal Sex (Without Condom)",
-            "Anal Sex (Without Condom) - Spouse",
-            "Ejaculate - Body",
-            "Ejaculate - Body - Spouse",
-            "Ejaculate - Face",
-            "Ejaculate - Face - Spouse",
+            "Anal Sex",
+            "Anal Sex",
+            "Anal Sex - Spouse",
+            "Anal Sex",
+            "Anal without",
+            "Anal sex",
+            "Ejaculate",
+            "Ejaculate Anal - Body",
+            "Ejaculate - Anal",
+            "Ejaculate Anal",
+            "Ejaculate",
+            "Ejaculate Anal",
             "Ejaculate - Vaginal",
-            "Ejaculate - Vaginal - Spouse",
-            "Ejaculate - Mouth",
-            "Ejaculate - Mouth - Spouse",
-            "Double Blowjob",
-            "Double Blowjob - Spouse",
-            "Double Penetration",
-            "Double Penetration - Spouse",
-            "Spit Roast",
-            "Spit Roast - Spouse",
-            "Oral Sex",
-            "Oral Sex - Spouse"
+            "Ejaculate Anal",
+            "Ejaculate",
+            "Mouth Anal",
+            "Double Ejaculation",
+            "Double Ejaculation - Spouse",
+            "Double Ejac",
+            "Double Ejaculation - Spouse",
+            "Ejac",
+            "Ejac Ejac",
+            "Oral Ejac",
+            "Oral Ejac - Spouse"
         ];
         const powerDynamicsKinks = [
             "Dominating",
@@ -116,7 +122,7 @@
             "Being Whipped - Spouse",
             "Being Suffocated",
             "Being Suffocated - Spouse",
-            "Sensory Play (Hot Wax, Ice, Pinwheels, Feathers, etc.)",
+            "Sensory Play",
             "Sensory Play (Hot Wax, Ice, Pinwheels, Feathers, etc.) - Spouse",
             "Biting",
             "Biting - Spouse",
@@ -134,12 +140,12 @@
             "Doing Activities Without Your Spouse - Spouse",
             "Group Activities",
             "Skinny Dipping",
-            "Naked Games (Cards, Board Games, Video Games, etc.)",
+            "Naked Games",
             "Dancing",
             "Lap Dancing",
             "Showering",
             "Sleeping in Same Bed",
-            "Video Call Sex",
+            "Video Call",
             "Sex in Same Room",
             "Sex in Same Bed",
             "Camping",
@@ -224,13 +230,69 @@
                 kinkList.insertAdjacentHTML('beforeend', genreHtml);
             }
 
-            // Update character counters
+            // Update character counters and add persistence listeners
             document.querySelectorAll('textarea').forEach(textarea => {
                 const charCount = document.getElementById(textarea.name.replace('notes', 'char-count'));
                 textarea.addEventListener('input', () => {
                     charCount.textContent = `${textarea.value.length}/500`;
+                    saveToLocalStorage();
                 });
             });
+            document.querySelectorAll('select').forEach(select => {
+                select.addEventListener('change', saveToLocalStorage);
+            });
+        }
+
+        // Collect selections
+        function collectSelections() {
+            const selections = [];
+            let hasError = false;
+            document.querySelectorAll('.kink-item').forEach(item => {
+                const kink = item.querySelector('.font-semibold').textContent;
+                const selectEls = item.querySelectorAll('select');
+                const notesEl = item.querySelector('textarea');
+                const kinkData = { kink };
+                selectEls.forEach(el => {
+                    const context = el.name.split('-').slice(-2).join('-');
+                    kinkData[context] = el.value;
+                });
+                const notes = notesEl ? sanitizeNotes(notesEl.value) : '';
+                if (notes.length > 500) {
+                    hasError = true;
+                    return;
+                }
+                kinkData.notes = notes;
+                selections.push(kinkData);
+            });
+            return { selections, hasError };
+        }
+
+        // Save to localStorage
+        function saveToLocalStorage() {
+            const { selections, hasError } = collectSelections();
+            if (!hasError) {
+                localStorage.setItem('desirePaletteSelections', JSON.stringify(selections));
+            }
+        }
+
+        // Load from localStorage
+        function loadFromLocalStorage() {
+            const stored = localStorage.getItem('desirePaletteSelections');
+            if (!stored) return [];
+
+            try {
+                const selections = JSON.parse(stored);
+                const allKinks = genres.flatMap(g => g.kinks);
+                return selections.filter(s => {
+                    if (!allKinks.includes(s.kink)) return false;
+                    if (!['giving-male', 'receiving-male', 'giving-female', 'receiving-female'].every(c => validDropdownValues.includes(s[c] || ''))) return false;
+                    if (s.notes && sanitizeNotes(s.notes).length > 500) return false;
+                    return true;
+                });
+            } catch (err) {
+                console.error('Invalid localStorage data:', err);
+                return [];
+            }
         }
 
         // Parse CSV content
@@ -300,6 +362,7 @@
                 }
 
                 if (selections.length > 0) {
+                    localStorage.setItem('desirePaletteSelections', JSON.stringify(selections));
                     renderKinks(genres, selections);
                     alert(`Imported ${selections.length} valid selections.`);
                 } else if (!errors.length) {
@@ -310,63 +373,29 @@
             e.target.value = ''; // Reset input for re-import
         });
 
-        // Render kinks initially
-        renderKinks(genres);
+        // Render kinks initially with stored selections
+        renderKinks(genres, loadFromLocalStorage());
 
         // Save selections
         document.getElementById('save-btn').addEventListener('click', () => {
-            const selections = [];
-            let hasError = false;
-            document.querySelectorAll('.kink-item').forEach(item => {
-                const kink = item.querySelector('.font-semibold').textContent;
-                const selectEls = item.querySelectorAll('select');
-                const notesEl = item.querySelector('textarea');
-                const kinkData = { kink };
-                selectEls.forEach(el => {
-                    const context = el.name.split('-').slice(-2).join('-');
-                    kinkData[context] = el.value;
-                });
-                const notes = notesEl ? sanitizeNotes(notesEl.value) : '';
-                if (notes.length > 500) {
-                    hasError = true;
-                    return;
-                }
-                kinkData.notes = notes;
-                selections.push(kinkData);
-            });
+            const { selections, hasError } = collectSelections();
             if (hasError) {
                 alert('Some notes exceed 500 characters. Please shorten them.');
                 return;
             }
+            localStorage.setItem('desirePaletteSelections', JSON.stringify(selections));
             console.log('Selections:', selections);
             alert('Selections saved! Check console for output.');
         });
 
         // Save as CSV
         document.getElementById('save-csv-btn').addEventListener('click', () => {
-            const selections = [];
-            let hasError = false;
-            document.querySelectorAll('.kink-item').forEach(item => {
-                const kink = item.querySelector('.font-semibold').textContent;
-                const selectEls = item.querySelectorAll('select');
-                const notesEl = item.querySelector('textarea');
-                const kinkData = { kink };
-                selectEls.forEach(el => {
-                    const context = el.name.split('-').slice(-2).join('-');
-                    kinkData[context] = el.value;
-                });
-                const notes = notesEl ? sanitizeNotes(notesEl.value) : '';
-                if (notes.length > 500) {
-                    hasError = true;
-                    return;
-                }
-                kinkData.notes = notes;
-                selections.push(kinkData);
-            });
+            const { selections, hasError } = collectSelections();
             if (hasError) {
                 alert('Some notes exceed 500 characters. Please shorten them.');
                 return;
             }
+            localStorage.setItem('desirePaletteSelections', JSON.stringify(selections));
 
             let csvContent = 'Kink,Giving-Male,Receiving-Male,Giving-Female,Receiving-Female,Notes\n';
             selections.forEach(item => {
@@ -387,29 +416,12 @@
 
         // Save as PDF
         document.getElementById('save-pdf-btn').addEventListener('click', () => {
-            const selections = [];
-            let hasError = false;
-            document.querySelectorAll('.kink-item').forEach(item => {
-                const kink = item.querySelector('.font-semibold').textContent;
-                const selectEls = item.querySelectorAll('select');
-                const notesEl = item.querySelector('textarea');
-                const kinkData = { kink };
-                selectEls.forEach(el => {
-                    const context = el.name.split('-').slice(-2).join('-');
-                    kinkData[context] = el.value;
-                });
-                const notes = notesEl ? sanitizeNotes(notesEl.value) : '';
-                if (notes.length > 500) {
-                    hasError = true;
-                    return;
-                }
-                kinkData.notes = notes;
-                selections.push(kinkData);
-            });
+            const { selections, hasError } = collectSelections();
             if (hasError) {
                 alert('Some notes exceed 500 characters. Please shorten them.');
                 return;
             }
+            localStorage.setItem('desirePaletteSelections', JSON.stringify(selections));
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
