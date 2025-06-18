@@ -166,7 +166,7 @@
             let html = `
                 <div class="kink-item mt-4 p-4">
                     <div class="text-lg font-semibold text-gray-600 mb-2">${kink}</div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             `;
             contexts.forEach((context, idx) => {
                 const contextId = contextIds[idx];
@@ -181,7 +181,13 @@
                     </div>
                 `;
             });
-            html += `</div></div>`;
+            html += `
+                    </div>
+                    <div>
+                        <label class="text-gray-600">Notes:</label>
+                        <textarea name="${safeKinkId}-notes" class="w-full p-2 border rounded resize-y" rows="3" placeholder="Add any notes or comments..."></textarea>
+                    </div>
+                </div>`;
             return html;
         }
 
@@ -211,11 +217,13 @@
             document.querySelectorAll('.kink-item').forEach(item => {
                 const kink = item.querySelector('.font-semibold').textContent;
                 const selectEls = item.querySelectorAll('select');
+                const notesEl = item.querySelector('textarea');
                 const kinkData = { Kink: kink };
                 selectEls.forEach(el => {
                     const context = el.name.split('-').slice(-2).join('-');
                     kinkData[context] = el.value;
                 });
+                kinkData.notes = notesEl ? notesEl.value : '';
                 selections.push(kinkData);
             });
             console.log('Selections:', selections);
@@ -228,17 +236,19 @@
             document.querySelectorAll('.kink-item').forEach(item => {
                 const kink = item.querySelector('.font-semibold').textContent;
                 const selectEls = item.querySelectorAll('select');
+                const notesEl = item.querySelector('textarea');
                 const kinkData = { Kink: kink };
                 selectEls.forEach(el => {
                     const context = el.name.split('-').slice(-2).join('-');
                     kinkData[context] = el.value;
                 });
+                kinkData.notes = notesEl ? notesEl.value.replace(/"/g, '""') : '';
                 selections.push(kinkData);
             });
 
-            let csvContent = 'Kink,Giving-Male,Receiving-Male,Giving-Female,Receiving-Female\n';
+            let csvContent = 'Kink,Giving-Male,Receiving-Male,Giving-Female,Receiving-Female,Notes\n';
             selections.forEach(item => {
-                csvContent += `"${item.Kink.replace(/"/g, '""')}","${item['giving-male'] || ''}","${item['receiving-male'] || ''}","${item['giving-female'] || ''}","${item['receiving-female'] || ''}"\n`;
+                csvContent += `"${item.Kink.replace(/"/g, '""')}","${item['giving-male'] || ''}","${item['receiving-male'] || ''}","${item['giving-female'] || ''}","${item['receiving-female'] || ''}","${item.notes}"\n`;
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -259,11 +269,13 @@
             document.querySelectorAll('.kink-item').forEach(item => {
                 const kink = item.querySelector('.font-semibold').textContent;
                 const selectEls = item.querySelectorAll('select');
+                const notesEl = item.querySelector('textarea');
                 const kinkData = { Kink: kink };
                 selectEls.forEach(el => {
                     const context = el.name.split('-').slice(-2).join('-');
                     kinkData[context] = el.value;
                 });
+                kinkData.notes = notesEl ? notesEl.value : '';
                 selections.push(kinkData);
             });
 
@@ -284,6 +296,10 @@
                         y += 5;
                     }
                 });
+                if (item.notes) {
+                    doc.text(`  Notes: ${item.notes}`, 10, y, { maxWidth: 180 });
+                    y += 10 + Math.ceil(item.notes.length / 90) * 5;
+                }
                 y += 5;
                 if (y > 270) {
                     doc.addPage();
