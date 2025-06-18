@@ -162,12 +162,35 @@
             const contextIds = ['giving-male', 'receiving-male', 'giving-female', 'receiving-female'];
             const options = ['Want To', 'Willing', 'Conditional', 'No'];
             const optionValues = ['want-to', 'willing', 'conditional', 'no'];
-
+        
             let html = `
                 <div class="kink-item mt-4 p-4">
                     <div class="text-lg font-semibold text-gray-600 mb-2">${kink}</div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             `;
+    contexts.forEach((context, idx) => {
+        const contextId = contextIds[idx];
+        const pref = preferences[contextId] || '';
+        html += `
+            <div>
+                <label class="text-gray-600">${context}:</label>
+                <select name="${safeKinkId}-${contextId}" class="w-full p-2 border rounded">
+                    <option value="">Select...</option>
+                    ${options.map((opt, i) => `<option value="${optionValues[i]}" ${pref === optionValues[i] ? 'selected' : ''}>${opt}</option>`).join('')}
+                </select>
+            </div>
+        `;
+    });
+    html += `
+            </div>
+            <div>
+                <label class="text-gray-600">Notes:</label>
+                <textarea name="${safeKinkId}-notes" class="w-full p-2 border rounded resize-y" rows="3" maxlength="500" placeholder="Add notes (max 500 chars)..."></textarea>
+                <div class="text-sm text-gray-500 text-right mt-1" id="${safeKinkId}-char-count">0/500</div>
+            </div>
+        </div>`;
+    return html;
+}
             contexts.forEach((context, idx) => {
                 const contextId = contextIds[idx];
                 const pref = preferences[contextId] || '';
@@ -191,6 +214,12 @@
             return html;
         }
 
+        function sanitizeNotes(text) {
+            // Strip HTML tags, trim whitespace
+            const div = document.createElement('div');
+            div.textContent = text.trim();
+            return div.textContent;
+        }
         // Function to render kinks by genre
         function renderKinks(genres) {
             const kinkList = document.getElementById('kink-list');
@@ -207,109 +236,145 @@
                 kinkList.insertAdjacentHTML('beforeend', genreHtml);
             }
         }
+        document.querySelectorAll('textarea').forEach(textarea => {
+            const charCount = document.getElementById(textarea.name.replace('notes', 'char-count'));
+            textarea.addEventListener('input', () => {
+                charCount.textContent = `${textarea.value.length}/500`;
+            });
+        });
 
         // Render kinks
         renderKinks(genres);
 
-        // Save selections
-        document.getElementById('save-btn').addEventListener('click', () => {
-            const selections = [];
-            document.querySelectorAll('.kink-item').forEach(item => {
-                const kink = item.querySelector('.font-semibold').textContent;
-                const selectEls = item.querySelectorAll('select');
-                const notesEl = item.querySelector('textarea');
-                const kinkData = { Kink: kink };
-                selectEls.forEach(el => {
-                    const context = el.name.split('-').slice(-2).join('-');
-                    kinkData[context] = el.value;
-                });
-                kinkData.notes = notesEl ? notesEl.value : '';
-                selections.push(kinkData);
-            });
-            console.log('Selections:', selections);
-            alert('Selections saved! Check console for output.');
+       // Save selections
+document.getElementById('save-btn').addEventListener('click', () => {
+    const selections = [];
+    let hasError = false;
+    document.querySelectorAll('.kink-item').forEach(item => {
+        const kink = item.querySelector('.font-semibold').textContent;
+        const selectEls = item.querySelectorAll('select');
+        const notesEl = item.querySelector('textarea');
+        const kinkData = { Kink: kink };
+        selectEls.forEach(el => {
+            const context = el.name.split('-').slice(-2).join('-');
+            kinkData[context] = el.value;
         });
+        const notes = notesEl ? sanitizeNotes(notesEl.value) : '';
+        if (notes.length > 500) {
+            hasError = true;
+            return;
+        }
+        kinkData.notes = notes;
+        selections.push(kinkData);
+    });
+    if (hasError) {
+        alert('Some notes exceed 500 characters. Please shorten them.');
+        return;
+    }
+    console.log('Selections:', selections);
+    alert('Selections saved! Check console for output.');
+});
 
-        // Save as CSV
-        document.getElementById('save-csv-btn').addEventListener('click', () => {
-            const selections = [];
-            document.querySelectorAll('.kink-item').forEach(item => {
-                const kink = item.querySelector('.font-semibold').textContent;
-                const selectEls = item.querySelectorAll('select');
-                const notesEl = item.querySelector('textarea');
-                const kinkData = { Kink: kink };
-                selectEls.forEach(el => {
-                    const context = el.name.split('-').slice(-2).join('-');
-                    kinkData[context] = el.value;
-                });
-                kinkData.notes = notesEl ? notesEl.value.replace(/"/g, '""') : '';
-                selections.push(kinkData);
-            });
-
-            let csvContent = 'Kink,Giving-Male,Receiving-Male,Giving-Female,Receiving-Female,Notes\n';
-            selections.forEach(item => {
-                csvContent += `"${item.Kink.replace(/"/g, '""')}","${item['giving-male'] || ''}","${item['receiving-male'] || ''}","${item['giving-female'] || ''}","${item['receiving-female'] || ''}","${item.notes}"\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'kink_list_selections.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            alert('CSV file downloaded!');
+// Save as CSV
+document.getElementById('save-csv-btn').addEventListener('click', () => {
+    const selections = [];
+    let hasError = false;
+    document.querySelectorAll('.kink-item').forEach(item => {
+        const kink = item.querySelector('.font-semibold').textContent;
+        const selectEls = item.querySelectorAll('select');
+        const notesEl = item.querySelector('textarea');
+        const kinkData = { Kink: kink };
+        selectEls.forEach(el => {
+            const context = el.name.split('-').slice(-2).join('-');
+            kinkData[context] = el.value;
         });
+        const notes = notesEl ? sanitizeNotes(notesEl.value) : '';
+        if (notes.length > 500) {
+            hasError = true;
+            return;
+        }
+        kinkData.notes = notes;
+        selections.push(kinkData);
+    });
+    if (hasError) {
+        alert('Some notes exceed 500 characters. Please shorten them.');
+        return;
+    }
 
-        // Save as PDF
-        document.getElementById('save-pdf-btn').addEventListener('click', () => {
-            const selections = [];
-            document.querySelectorAll('.kink-item').forEach(item => {
-                const kink = item.querySelector('.font-semibold').textContent;
-                const selectEls = item.querySelectorAll('select');
-                const notesEl = item.querySelector('textarea');
-                const kinkData = { Kink: kink };
-                selectEls.forEach(el => {
-                    const context = el.name.split('-').slice(-2).join('-');
-                    kinkData[context] = el.value;
-                });
-                kinkData.notes = notesEl ? notesEl.value : '';
-                selections.push(kinkData);
-            });
+    let csvContent = 'Kink,Giving-Male,Receiving-Male,Giving-Female,Receiving-Female,Notes\n';
+    selections.forEach(item => {
+        csvContent += `"${item.Kink.replace(/"/g, '""')}","${item['giving-male'] || ''}","${item['receiving-male'] || ''}","${item['giving-female'] || ''}","${item['receiving-female'] || ''}","${item.notes.replace(/"/g, '""')}"\n`;
+    });
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(16);
-            doc.text('Desire Palette Selections', 10, 10);
-            doc.setFontSize(12);
-            let y = 20;
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'kink_list_selections.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    alert('CSV file downloaded!');
+});
 
-            selections.forEach(item => {
-                doc.text(`${item.Kink}:`, 10, y);
+// Save as PDF
+document.getElementById('save-pdf-btn').addEventListener('click', () => {
+    const selections = [];
+    let hasError = false;
+    document.querySelectorAll('.kink-item').forEach(item => {
+        const kink = item.querySelector('.font-semibold').textContent;
+        const selectEls = item.querySelectorAll('select');
+        const notesEl = item.querySelector('textarea');
+        const kinkData = { Kink: kink };
+        selectEls.forEach(el => {
+            const context = el.name.split('-').slice(-2).join('-');
+            kinkData[context] = el.value;
+        });
+        const notes = notesEl ? sanitizeNotes(notesEl.value) : '';
+        if (notes.length > 500) {
+            hasError = true;
+            return;
+        }
+        kinkData.notes = notes;
+        selections.push(kinkData);
+    });
+    if (hasError) {
+        alert('Some notes exceed 500 characters. Please shorten them.');
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('Desire Palette Selections', 10, 10);
+    doc.setFontSize(12);
+    let y = 20;
+
+    selections.forEach(item => {
+        doc.text(`${item.Kink}:`, 10, y);
+        y += 5;
+        ['giving-male', 'receiving-male', 'giving-female', 'receiving-female'].forEach(context => {
+            if (item[context]) {
+                const contextName = context.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                doc.text(`  ${contextName}: ${item[context]}`, 10, y);
                 y += 5;
-                ['giving-male', 'receiving-male', 'giving-female', 'receiving-female'].forEach(context => {
-                    if (item[context]) {
-                        const contextName = context.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                        doc.text(`  ${contextName}: ${item[context]}`, 10, y);
-                        y += 5;
-                    }
-                });
-                if (item.notes) {
-                    doc.text(`  Notes: ${item.notes}`, 10, y, { maxWidth: 180 });
-                    y += 10 + Math.ceil(item.notes.length / 90) * 5;
-                }
-                y += 5;
-                if (y > 270) {
-                    doc.addPage();
-                    y = 10;
-                }
-            });
-
-            doc.save('kink_list_selections.pdf');
-            alert('PDF file downloaded!');
+            }
         });
+        if (item.notes) {
+            doc.text(`  Notes: ${item.notes}`, 10, y, { maxWidth: 180 });
+            y += 10 + Math.ceil(item.notes.length / 90) * 5;
+        }
+        y += 5;
+        if (y > 270) {
+            doc.addPage();
+            y = 10;
+        }
+    });
+
+    doc.save('kink_list_selections.pdf');
+    alert('PDF file downloaded!');
+});
     </script>
 </body>
 </html>
