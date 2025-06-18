@@ -18,140 +18,142 @@
         </div>
     </div>
     <script>
-        // Kink data as array of objects
-        <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desire Palette</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-</head>
-<body class="bg-gray-100 font-sans">
-    <div class="container mx-auto p-6 max-w-4xl">
-        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Desire Palette</h1>
-        <div id="kink-list" class="space-y-6"></div>
-        <div class="mt-8 text-center space-x-4">
-            <button id="save-btn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save Selections</button>
-            <button id="save-csv-btn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save as CSV</button>
-            <button id="save-pdf-btn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Save as PDF</button>
-        </div>
-    </div>
-    <script>
-        // Kink data as array of objects
-        const kinkData = [
-    { genre: "Soft Swap Activities", kink: "Soft Swap (No Intercourse)", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Soft Swap Activities", kink: "Flirting", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Soft Swap Activities", kink: "Flirting - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Soft Swap Activities", kink: "Staring", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Soft Swap Activities", kink: "Staring - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Touching Body", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Touching Body - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Touching Face", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Touching Face - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Touching Breast", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Touching Breast - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Touching Genitals", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Touching Genitals - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Touching Ass", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Touching Ass - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Incidental Touching Anywhere", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Incidental Touching Anywhere - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Touching Feet", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Touching", kink: "Touching Feet - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Kissing and Licking", kink: "Kissing Body", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Kissing and Licking", kink: "Kissing Body - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Kissing and Licking", kink: "Kissing Face", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Kissing and Licking", kink: "Kissing Face - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Kissing and Licking", kink: "Licking/Sucking Breasts", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Kissing and Licking", kink: "Licking/Sucking Breasts - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Kissing and Licking", kink: "Licking/Sucking Genitals", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Kissing and Licking", kink: "Licking/Sucking Genitals - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Kissing and Licking", kink: "Licking/Kissing Ass", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Kissing and Licking", kink: "Licking/Kissing Ass - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Kissing and Licking", kink: "Licking Feet", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Kissing and Licking", kink: "Licking Feet - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Intercourse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Masturbating Others Genitals to Orgasm", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Masturbating Others Genitals to Orgasm - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Touching Genitals to Genitals (No Penetration)", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Touching Genitals to Genitals (No Penetration) - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Sex Toys", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Sex Toys - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Vaginal Sex (With Condom)", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Vaginal Sex (With Condom) - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Vaginal Sex (Without Condom)", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Vaginal Sex (Without Condom) - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Anal Play - Finger", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Anal Play - Finger - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Anal Play - Toy", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Anal Play - Toy - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Anal Sex (With Condom)", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Anal Sex (With Condom) - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Anal Sex (Without Condom)", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Anal Sex (Without Condom) - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Ejaculate - Body", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Ejaculate - Body - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Ejaculate - Face", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Ejaculate - Face - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Ejaculate - Vaginal", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Ejaculate - Vaginal - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Ejaculate - Mouth", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Ejaculate - Mouth - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Double Blowjob", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Double Blowjob - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Double Penetration", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Double Penetration - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Spit Roast", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Spit Roast - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Oral Sex", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sexual Acts", kink: "Oral Sex - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Power Dynamics", kink: "Dominating", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Power Dynamics", kink: "Dominating - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Power Dynamics", kink: "Being Dominated", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Power Dynamics", kink: "Being Dominated - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Power Dynamics", kink: "Restrained", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Power Dynamics", kink: "Restrained - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Power Dynamics", kink: "Blindfolded", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Power Dynamics", kink: "Blindfolded - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Electric Play", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Electric Play - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Whipping", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Whipping - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Being Whipped", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Being Whipped - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Being Suffocated", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Being Suffocated - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Sensory Play (Hot Wax, Ice, Pinwheels, Feathers, etc.)", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Sensory Play (Hot Wax, Ice, Pinwheels, Feathers, etc.) - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Biting", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Biting - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Hair Pulling", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Hair Pulling - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Scratches", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Hickies", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Bruises/Marks", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Sensory and Pain", kink: "Pain", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Just Watching", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Just Watching - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Doing Activities Without Your Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Doing Activities Without Your Spouse - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Group Activities", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Skinny Dipping", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Naked Games (Cards, Board Games, Video Games, etc.)", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Dancing", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Lap Dancing", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Showering", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Sleeping in Same Bed", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Video Call Sex", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Sex in Same Room", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Sex in Same Bed", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Camping", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Dirty Talking", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Dirty Talking - Spouse", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" },
-    { genre: "Group and Social", kink: "Caressing/Cuddling", giving_male: "", receiving_male: "", giving_female: "", receiving_female: "" }
-];
+        // Define kink arrays by genre
+        const softSwapKinks = [
+            "Soft Swap (No Intercourse)",
+            "Flirting",
+            "Flirting - Spouse",
+            "Staring",
+            "Staring - Spouse"
+        ];
+        const touchingKinks = [
+            "Touching Body",
+            "Touching Body - Spouse",
+            "Touching Face",
+            "Touching Face - Spouse",
+            "Touching Breast",
+            "Touching Breast - Spouse",
+            "Touching Genitals",
+            "Touching Genitals - Spouse",
+            "Touching Ass",
+            "Touching Ass - Spouse",
+            "Incidental Touching Anywhere",
+            "Incidental Touching Anywhere - Spouse",
+            "Touching Feet",
+            "Touching Feet - Spouse"
+        ];
+        const kissingLickingKinks = [
+            "Kissing Body",
+            "Kissing Body - Spouse",
+            "Kissing Face",
+            "Kissing Face - Spouse",
+            "Licking/Sucking Breasts",
+            "Licking/Sucking Breasts - Spouse",
+            "Licking/Sucking Genitals",
+            "Licking/Sucking Genitals - Spouse",
+            "Licking/Kissing Ass",
+            "Licking/Kissing Ass - Spouse",
+            "Licking Feet",
+            "Licking Feet - Spouse"
+        ];
+        const sexualActsKinks = [
+            "Intercourse",
+            "Masturbating Others Genitals to Orgasm",
+            "Masturbating Others Genitals to Orgasm - Spouse",
+            "Touching Genitals to Genitals (No Penetration)",
+            "Touching Genitals to Genitals (No Penetration) - Spouse",
+            "Sex Toys",
+            "Sex Toys - Spouse",
+            "Vaginal Sex (With Condom)",
+            "Vaginal Sex (With Condom) - Spouse",
+            "Vaginal Sex (Without Condom)",
+            "Vaginal Sex (Without Condom) - Spouse",
+            "Anal Play - Finger",
+            "Anal Play - Finger - Spouse",
+            "Anal Play - Toy",
+            "Anal Play - Toy - Spouse",
+            "Anal Sex (With Condom)",
+            "Anal Sex (With Condom) - Spouse",
+            "Anal Sex (Without Condom)",
+            "Anal Sex (Without Condom) - Spouse",
+            "Ejaculate - Body",
+            "Ejaculate - Body - Spouse",
+            "Ejaculate - Face",
+            "Ejaculate - Face - Spouse",
+            "Ejaculate - Vaginal",
+            "Ejaculate - Vaginal - Spouse",
+            "Ejaculate - Mouth",
+            "Ejaculate - Mouth - Spouse",
+            "Double Blowjob",
+            "Double Blowjob - Spouse",
+            "Double Penetration",
+            "Double Penetration - Spouse",
+            "Spit Roast",
+            "Spit Roast - Spouse",
+            "Oral Sex",
+            "Oral Sex - Spouse"
+        ];
+        const powerDynamicsKinks = [
+            "Dominating",
+            "Dominating - Spouse",
+            "Being Dominated",
+            "Being Dominated - Spouse",
+            "Restrained",
+            "Restrained - Spouse",
+            "Blindfolded",
+            "Blindfolded - Spouse"
+        ];
+        const sensoryPainKinks = [
+            "Electric Play",
+            "Electric Play - Spouse",
+            "Whipping",
+            "Whipping - Spouse",
+            "Being Whipped",
+            "Being Whipped - Spouse",
+            "Being Suffocated",
+            "Being Suffocated - Spouse",
+            "Sensory Play (Hot Wax, Ice, Pinwheels, Feathers, etc.)",
+            "Sensory Play (Hot Wax, Ice, Pinwheels, Feathers, etc.) - Spouse",
+            "Biting",
+            "Biting - Spouse",
+            "Hair Pulling",
+            "Hair Pulling - Spouse",
+            "Scratches",
+            "Hickies",
+            "Bruises/Marks",
+            "Pain"
+        ];
+        const groupSocialKinks = [
+            "Just Watching",
+            "Just Watching - Spouse",
+            "Doing Activities Without Your Spouse",
+            "Doing Activities Without Your Spouse - Spouse",
+            "Group Activities",
+            "Skinny Dipping",
+            "Naked Games (Cards, Board Games, Video Games, etc.)",
+            "Dancing",
+            "Lap Dancing",
+            "Showering",
+            "Sleeping in Same Bed",
+            "Video Call Sex",
+            "Sex in Same Room",
+            "Sex in Same Bed",
+            "Camping",
+            "Dirty Talking",
+            "Dirty Talking - Spouse",
+            "Caressing/Cuddling"
+        ];
+
+        // Define genres array
+        const genres = [
+            { name: "Soft Swap Activities", kinks: softSwapKinks },
+            { name: "Touching", kinks: touchingKinks },
+            { name: "Kissing and Licking", kinks: kissingLickingKinks },
+            { name: "Sexual Acts", kinks: sexualActsKinks },
+            { name: "Power Dynamics", kinks: powerDynamicsKinks },
+            { name: "Sensory and Pain", kinks: sensoryPainKinks },
+            { name: "Group and Social", kinks: groupSocialKinks }
+        ];
 
         // Function to generate kink item HTML
         function createKinkItem(kink, genre, preferences = {}) {
@@ -183,184 +185,25 @@
             return html;
         }
 
-        // Function to group kinks by genre
-        function renderKinks(data) {
+        // Function to render kinks by genre
+        function renderKinks(genres) {
             const kinkList = document.getElementById('kink-list');
-            const genres = [...new Set(data.map(item => item.genre))];
-            genres.forEach(genre => {
-                const genreKinks = data.filter(item => item.genre === genre);
+            for (const genre of genres) {
                 let genreHtml = `
                     <div class="genre-section bg-white rounded-lg shadow-md">
-                        <button class="w-full text-left text-2xl font-semibold text-gray-700 border-b-2 border-gray-300 p-4 hover:bg-gray-50" onclick="this.nextElementSibling.classList.toggle('hidden')">${genre}</button>
+                        <button class="w-full text-left text-2xl font-semibold text-gray-700 border-b-2 border-gray-300 p-4 hover:bg-gray-50" onclick="this.nextElementSibling.classList.toggle('hidden')">${genre.name}</button>
                         <div class="mt-4 p-4 hidden">
                 `;
-                genreKinks.forEach(item => {
-                    const preferences = {
-                        'giving-male': item.giving_male || '',
-                        'receiving-male': item.receiving_male || '',
-                        'giving-female': item.giving_female || '',
-                        'receiving-female': item.receiving_female || ''
-                    };
-                    genreHtml += createKinkItem(item.kink, genre, preferences);
-                });
-                genreHtml += `</div></div>`;
-                kinkList.insertAdjacentHTML('beforeend', genreHtml);
-            });
-        }
-
-        // Render kinks
-        renderKinks(kinkData);
-
-        // Save selections
-        document.getElementById('save-btn').addEventListener('click', () => {
-            const selections = [];
-            document.querySelectorAll('.kink-item').forEach(item => {
-                const kink = item.querySelector('.font-semibold').textContent;
-                const selectEls = item.querySelectorAll('select');
-                const kinkData = { Kink: kink };
-                selectEls.forEach(el => {
-                    const context = el.name.split('-').slice(-2).join('-');
-                    kinkData[context] = el.value;
-                });
-                selections.push(kinkData);
-            });
-            console.log('Selections:', selections);
-            alert('Selections saved! Check console for output.');
-        });
-
-        // Save as CSV
-        document.getElementById('save-csv-btn').addEventListener('click', () => {
-            const selections = [];
-            document.querySelectorAll('.kink-item').forEach(item => {
-                const kink = item.querySelector('.font-semibold').textContent;
-                const selectEls = item.querySelectorAll('select');
-                const kinkData = { Kink: kink };
-                selectEls.forEach(el => {
-                    const context = el.name.split('-').slice(-2).join('-');
-                    kinkData[context] = el.value;
-                });
-                selections.push(kinkData);
-            });
-
-            let csvContent = 'Kink,Giving-Male,Receiving-Male,Giving-Female,Receiving-Female\n';
-            selections.forEach(item => {
-                csvContent += `"${item.Kink.replace(/"/g, '""')}","${item['giving-male'] || ''}","${item['receiving-male'] || ''}","${item['giving-female'] || ''}","${item['receiving-female'] || ''}"\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'kink_list_selections.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            alert('CSV file downloaded!');
-        });
-
-        // Save as PDF
-        document.getElementById('save-pdf-btn').addEventListener('click', () => {
-            const selections = [];
-            document.querySelectorAll('.kink-item').forEach(item => {
-                const kink = item.querySelector('.font-semibold').textContent;
-                const selectEls = item.querySelectorAll('select');
-                const kinkData = { Kink: kink };
-                selectEls.forEach(el => {
-                    const context = el.name.split('-').slice(-2).join('-');
-                    kinkData[context] = el.value;
-                });
-                selections.push(kinkData);
-            });
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(16);
-            doc.text('Desire Palette Selections', 10, 10);
-            doc.setFontSize(12);
-            let y = 20;
-
-            selections.forEach(item => {
-                doc.text(`${item.Kink}:`, 10, y);
-                y += 5;
-                ['giving-male', 'receiving-male', 'giving-female', 'receiving-female'].forEach(context => {
-                    if (item[context]) {
-                        const contextName = context.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                        doc.text(`  ${contextName}: ${item[context]}`, 10, y);
-                        y += 5;
-                    }
-                });
-                y += 5;
-                if (y > 270) {
-                    doc.addPage();
-                    y = 10;
+                for (const kink of genre.kinks) {
+                    genreHtml += createKinkItem(kink, genre.name, {});
                 }
-            });
-
-            doc.save('kink_list_selections.pdf');
-            alert('PDF file downloaded!');
-        });
-    </script>
-</body>
-</html>
-
-        // Function to generate kink item HTML
-        function createKinkItem(kink, genre, preferences = {}) {
-            const safeKinkId = kink.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
-            const contexts = ['Giving Male', 'Receiving Male', 'Giving Female', 'Receiving Female'];
-            const contextIds = ['giving-male', 'receiving-male', 'giving-female', 'receiving-female'];
-            const options = ['Want To', 'Willing', 'Conditional', 'No'];
-            const optionValues = ['want-to', 'willing', 'conditional', 'no'];
-
-            let html = `
-                <div class="kink-item mt-4 p-4">
-                    <div class="text-lg font-semibold text-gray-600 mb-2">${kink}</div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            `;
-            contexts.forEach((context, idx) => {
-                const contextId = contextIds[idx];
-                const pref = preferences[contextId] || '';
-                html += `
-                    <div>
-                        <label class="text-gray-600">${context}:</label>
-                        <select name="${safeKinkId}-${contextId}" class="w-full p-2 border rounded">
-                            <option value="">Select...</option>
-                            ${options.map((opt, i) => `<option value="${optionValues[i]}" ${pref === optionValues[i] ? 'selected' : ''}>${opt}</option>`).join('')}
-                        </select>
-                    </div>
-                `;
-            });
-            html += `</div></div>`;
-            return html;
-        }
-
-        // Function to group kinks by genre
-        function renderKinks(data) {
-            const kinkList = document.getElementById('kink-list');
-            const genres = [...new Set(data.map(item => item.genre))];
-            genres.forEach(genre => {
-                const genreKinks = data.filter(item => item.genre === genre);
-                let genreHtml = `
-                    <div class="genre-section bg-white rounded-lg shadow-md">
-                        <button class="w-full text-left text-2xl font-semibold text-gray-700 border-b-2 border-gray-300 p-4 hover:bg-gray-50" onclick="this.nextElementSibling.classList.toggle('hidden')">${genre}</button>
-                        <div class="mt-4 p-4 hidden">
-                `;
-                genreKinks.forEach(item => {
-                    const preferences = {
-                        'giving-male': item.giving_male || '',
-                        'receiving-male': item.receiving_male || '',
-                        'giving-female': item.giving_female || '',
-                        'receiving-female': item.receiving_female || ''
-                    };
-                    genreHtml += createKinkItem(item.kink, genre, preferences);
-                });
                 genreHtml += `</div></div>`;
                 kinkList.insertAdjacentHTML('beforeend', genreHtml);
-            });
+            }
         }
 
         // Render kinks
-        renderKinks(kinkData);
+        renderKinks(genres);
 
         // Save selections
         document.getElementById('save-btn').addEventListener('click', () => {
